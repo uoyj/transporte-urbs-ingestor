@@ -1,0 +1,42 @@
+services:
+  app:
+    build: .
+    container_name: transporte-urbs-ingestor-app
+    volumes:
+      - .:/app
+      - ./alembic:/app/alembic
+    networks:
+      - urbs_internal
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-urbs_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_production}
+      POSTGRES_DB: ${POSTGRES_DB:-urbs_db}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: transporte-urbs-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-urbs_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_production}
+      POSTGRES_DB: ${POSTGRES_DB:-urbs_db}
+    volumes:
+      - urbs_pg_data:/var/lib/postgresql/data
+    networks:
+      urbs_internal:
+        ipv4_address: 192.168.2.200
+    restart: unless-stopped
+
+networks:
+  urbs_internal:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.2.0/24
+
+volumes:
+  urbs_pg_data:
