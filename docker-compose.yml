@@ -20,6 +20,8 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: transporte-urbs-postgres
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-urbs_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_production}
@@ -28,7 +30,7 @@ services:
       - urbs_pg_data:/var/lib/postgresql/data
     networks:
       urbs_internal:
-        ipv4_address: 192.168.2.200
+        ipv4_address: 172.28.1.2
     restart: unless-stopped
 
 networks:
@@ -36,7 +38,7 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 192.168.2.0/24
+        - subnet: 172.28.0.0/16
 
 volumes:
   urbs_pg_data:
