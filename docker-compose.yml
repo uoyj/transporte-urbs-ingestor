@@ -5,6 +5,7 @@ services:
     volumes:
       - .:/app
       - ./alembic:/app/alembic
+      - ${CRAWLER_DIR:-/mnt/shared/jhonatan/Development/crawler-dadosabertos-cwb}:/app/crawler:rw
     networks:
       - urbs_internal
     environment:
@@ -13,6 +14,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-urbs_db}
       POSTGRES_HOST: postgres
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      CRAWLER_OUTPUT_PATH: ${CRAWLER_OUTPUT_PATH:-/app/crawler/downloads}
+      INGESTION_SCHEDULE: ${INGESTION_SCHEDULE:-02:00}
     depends_on:
       - postgres
     restart: unless-stopped

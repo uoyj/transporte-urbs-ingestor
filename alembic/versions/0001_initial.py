@@ -1,4 +1,4 @@
-"""Inicial: linhas, pontos e horários
+"""Inicial: linhas, pontos e horarios
 
 Revision ID: 0001_initial
 Revises: 
@@ -43,6 +43,8 @@ def upgrade() -> None:
         sa.Column("ponto_id", sa.Integer, sa.ForeignKey("pontos.id", ondelete="CASCADE")),
         sa.Column("dia_semana", sa.String(10), nullable=False),
         sa.Column("hora", sa.String(8), nullable=False),
+        # Unique constraint for idempotent upsert via ON CONFLICT
+        sa.UniqueConstraint("ponto_id", "dia_semana", "hora", name="uq_horarios_ponto_dia_hora"),
     )
 
 

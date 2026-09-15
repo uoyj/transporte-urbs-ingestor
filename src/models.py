@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric, Text, ForeignKey, Index, Enum
+from sqlalchemy import Column, Integer, String, Numeric, Text, ForeignKey, Index, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -42,6 +42,11 @@ class Horario(Base):
     ponto_id = Column(Integer, ForeignKey("pontos.id", ondelete="CASCADE"))
     dia_semana = Column(String(10), nullable=False)  # ex: "2" para segunda
     hora = Column(String(8), nullable=False)  # formato "HH:MM"
+
+    # Unique constraint para upsert idempotente (ON CONFLICT)
+    __table_args__ = (
+        UniqueConstraint("ponto_id", "dia_semana", "hora", name="uq_horarios_ponto_dia_hora"),
+    )
 
     ponto = relationship("Ponto", back_populates="horarios")
 

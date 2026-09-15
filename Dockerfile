@@ -5,11 +5,14 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install system deps for psycopg2
-RUN apt-get update && apt-get install -y --no-install-recommends gcc libpq-dev && rm -rf /var/lib/apt/lists/*
+# Install system deps for psycopg2 + lzma
+RUN apt-get update && apt-get install -y --no-install-recommends gcc libpq-dev liblzma-dev && rm -rf /var/lib/apt/lists/*
 
 # Install Python deps
 RUN pip install --no-cache-dir alembic sqlalchemy psycopg2-binary python-dotenv
+
+# Install crawler dependencies (httpx, beautifulsoup4, lxml)
+RUN pip install --no-cache-dir httpx beautifulsoup4 lxml
 
 # Copy project files
 COPY pyproject.toml ./
@@ -18,10 +21,14 @@ COPY alembic/ ./alembic/
 COPY alembic.ini ./
 COPY .env.example ./.env.example
 
-# Install project in editable mode
+# Install ingestor project
 RUN pip install --no-cache-dir -e .
 
-# Load env vars at runtime
-ENV PYTHONPATH=/app
+# Crawler source is mounted as volume at runtime (docker-compose.yml)
+# PYTHONPATH includes /app/crawler for importing crawler_dadosabertos_cwb
+ENV PYTHONPATH=/app:/app/crawler
 
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+# Default: run scheduler (ingestao 1x/dia via INGESTION_SCHEDULE)
+# Override for manual: docker compose run --rm --entrypoint python app -m src.ingestor --once
+ENTRYPOINT ["python", "-m", "src.ingestor"]
+CMD []
